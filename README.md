@@ -6,10 +6,10 @@ the state machine is based on `actions`, which are based on `states`, and `requi
 
 `Actions` consist of:
 
-- Prerequisite `states`: required for the Action to be valid
+- `requiredStates`: before `execute`, required for the Action to be valid
 - `execute`: a function to execute once prereqs are valid
-- Post `fulfilsRequirements`: an assertion of what `requirements` are fulfiled after the action
-- `failure`: an optional function to run if `fulfilsRequirements` doesnt get fulfiled after the action, probably due to developer forgetting to cover/catch some edge case
+- `postExecuteRequirements`: post `execute`, an optional assertion of what `requirements` are fulfiled after the action
+- `failure`: an optional function to run if `postExecuteRequirements` doesnt get fulfiled after the action, probably due to developer forgetting to cover/catch some edge case but informs the user
 
 `states` are defined by a list of `requirements`.
 
