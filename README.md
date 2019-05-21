@@ -6,17 +6,19 @@ the state machine is based on `actions`, which are based on `states`, and `requi
 
 `Actions` consist of:
 
-- `requiredStates`: before `execute`, required for the Action to be valid
+- `requiredStates`: before `execute`, required States for the Action to be valid
 - `execute`: a function to execute once prereqs are valid
-- `postExecuteRequirements`: post `execute`, an optional assertion of what `requirements` are fulfiled after the action
+- `postExecuteState`: post `execute`, what State the action leads to.
 - `failure`: an optional function to run if `postExecuteRequirements` doesnt get fulfiled after the action, probably due to developer forgetting to cover/catch some edge case but informs the user
 
-`states` are defined by a list of `requirements`.
+`States` are defined by a list of `Requirements`.
 
-`requirements` have:
+`Requirements` have:
 
 - `getter`s: a function that runs on the config and gets values to work with
-- `assertion`s: a function that runs on the getters and returns a boolean.
+- `assertion`s: a function that runs on the result of getters and returns a boolean.
+
+We can run assertions on the requirements at any time. Users should try to get their data from `getters` instead of directly accessing so that they don't run into inconsistent states and fail.
 
 check the comments on `src/types.ts` for more detailed info.
 
