@@ -1,49 +1,42 @@
-import { Action, State, Requirement } from '../../src/types'
+import { Action, State } from '../../src/types'
 import { initStateMachine, processStateMachine } from '../../src'
 import { blankConfig } from '../../src/index'
 
 let password = 'oldPassword'
 let loginStatus = false
 
-const loggedInRequirement: Requirement = {
-  name: 'loggedIn',
-  getter: async () => loginStatus,
+export const loggedInState: State = {
+  stateId: 'loggedIn',
+  getValue: async () => loginStatus,
   assert: async (status: boolean) => status === true,
 }
-const loggedOutRequirement: Requirement = {
-  name: 'loggedOut',
-  getter: async () => loginStatus,
+export const loggedOutState: State = {
+  stateId: 'loggedOut',
+  getValue: async () => loginStatus,
   assert: async (status: boolean) => status === false,
 }
-
-export const loggedInState: State = {
-  uniqueName: 'loggedIn',
-  requirements: [loggedInRequirement],
-}
-export const loggedOutState: State = {
-  uniqueName: 'loggedOut',
-  requirements: [loggedOutRequirement],
-}
 export const loginAction: Action = {
-  uniqueId: 'loginAction',
-  requiredStates: [loggedOutState],
-  postExecuteState: loggedInState,
+  actionId: 'loginAction',
+  beforeState: loggedOutState,
+  afterState: loggedInState,
   execute: async () => {
+    // console.log('logging in')
     loginStatus = true
   },
 }
 export const logoutAction: Action = {
-  uniqueId: 'logoutAction',
-  requiredStates: [loggedInState],
-  postExecuteState: loggedOutState,
+  actionId: 'logoutAction',
+  beforeState: loggedInState,
+  afterState: loggedOutState,
   execute: async () => {
+    // console.log('logging out')
     loginStatus = false
   },
 }
 export const changePasswordAction: Action = {
-  uniqueId: 'changePassword',
-  requiredStates: [loggedInState],
-  postExecuteState: loggedInState,
+  actionId: 'changePassword',
+  beforeState: loggedInState,
+  afterState: loggedInState,
   execute: async () => {
     password = 'newPassword'
   },

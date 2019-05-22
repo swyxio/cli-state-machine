@@ -18,18 +18,18 @@ export const createRequiredFieldInConfig = (
 
   const fieldNameMissingState: State = {
     stateId: 'fieldNameMissingState_' + fieldName,
-    value: async (config: Config) => config[fieldName],
+    getValue: async (config: Config) => config[fieldName],
     assert: async (field: any) => field === undefined,
   }
   const fieldNameExistsState: State = {
     stateId: 'fieldNameExistsState_' + fieldName,
-    value: async (config: Config) => config[fieldName],
+    getValue: async (config: Config) => config[fieldName],
     assert: async (field: any) => field !== undefined,
   }
   const fieldNamePromptAction: Action = {
     actionId: 'fieldNamePromptAction_' + fieldName,
-    preStates: [fieldNameMissingState],
-    postState: fieldNameExistsState,
+    beforeState: fieldNameMissingState,
+    afterState: fieldNameExistsState,
     execute: async config => {
       const question = {
         type: 'input',

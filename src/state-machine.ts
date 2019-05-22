@@ -54,51 +54,48 @@ export const processStateMachine = async <T = any>(
   // let flatMappedStates: State[] = []
   // CLIactions.forEach(action => action.beforeState.forEach(state => flatMappedStates.push(state)))
   // const validatedStates = await validateStates(flatMappedStates, config)
-  const validatedState = await validateState(action.beforeState, config)
-  if (validatedState.isValid) {
-    await action.execute(config, validatedState.value)
-  } else {
+  let validatedState = await validateState(action.beforeState, config)
+  while (!validatedState.isValid) {
     console.log(
       'DEBUG: some required states for this action were not valid, entering state machine'
     )
-    // // some required states for this action were not valid
-    // for (const state of validatedStates) {
-    //   if (!state.isValid) continue
-    //   // TODO: really need to make sure we generalize action.beforeState[0].stateId
-    //   log(
-    //     `need to fulfil ${chalk.yellow(action.beforeState[0].stateId)}, currently at ${chalk.yellow(
-    //       state.stateId
-    //     )}`
-    //   )
-    // }
+    let validStatesAndActions = (await Promise.all(
+      CLIactions.map(async action => {
+        const state = await validateState(action.beforeState, config)
+        return { action, state }
+      })
+    )).filter(x => x.state.isValid)
 
-    CLIStateMachine = Machine({
-      ...constructStateMachine(CLIactions),
-      initial: validatedState.stateId,
+    // right now we cheat and use find, but in future we use shortest path
+    const stateActionPathTupleArr = validStatesAndActions.map(({ action, state }) => {
+      CLIStateMachine = Machine({
+        ...constructStateMachine(CLIactions),
+        initial: state.stateId,
+      })
+      // TODO: think about nested graphs https://github.com/davidkpiano/xstate/issues/462
+      const { path } = getShortestPaths(CLIStateMachine)[`"${validatedState.stateId}"`]
+      return { action, state, path, length: path.length }
     })
-    // TODO: think about nested graphs https://github.com/davidkpiano/xstate/issues/462
-    const { path } = getShortestPaths(CLIStateMachine)[`"${validatedState.stateId}"`]
-    for (const pathItem of path) {
-      const {
-        event: { type: actionId },
-      } = pathItem
-      const chosenAction = CLIactions.find(action => action.actionId === actionId)
-      if (chosenAction) {
-        log(`executing subaction ${chalk.yellow(chosenAction.actionId)} `)
-        const _value = await chosenAction.beforeState.getValue(config)
-        await chosenAction.execute(config, _value)
-      } else {
-        logError(
-          `While healing, attempted to find ${chalk.yellow(
-            actionId
-          )} but couldnt. likely due to a malformed state machine`
-        )
-      }
+    const stateActionPathTupleArrSorted = stateActionPathTupleArr.sort(
+      (a, b) => a.length - b.length
+    )
+    if (stateActionPathTupleArrSorted.length < 1) {
+      logError(
+        `While healing, attempted to find ${chalk.yellow(
+          currentAction.actionId
+        )} but couldnt. likely due to a malformed state machine`
+      )
     }
-    // so we should have healed by now and can execute
-    const _value = await action.beforeState.getValue(config)
-    await action.execute(config, _value)
+    const shortestPathTuple = stateActionPathTupleArr.sort((a, b) => a.length - b.length)[0]
+    log(`executing subaction ${chalk.yellow(shortestPathTuple.action.actionId)} `)
+    await shortestPathTuple.action.execute(config, shortestPathTuple.state.value)
+
+    // re eval original state
+    validatedState = await validateState(action.beforeState, config)
   }
+  // so we should have healed by now and can execute
+  const _value = await action.beforeState.getValue(config)
+  await action.execute(config, _value)
   // after execution, optionally check if post execution requirements have been fulfiled
   if (action.afterState) {
     const { isValid, value } = await validateState(action.afterState, config)

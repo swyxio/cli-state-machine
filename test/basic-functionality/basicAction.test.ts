@@ -5,28 +5,22 @@ import { blankConfig } from '../../src/index'
 let foo = 0
 
 export const myState: State = {
-  uniqueName: 'state1',
+  stateId: 'state1',
   description: 'state1 description',
-  requirements: [
-    {
-      name: 'req1',
-      description: 'req1desc',
-      getter: async () => foo,
-      assert: async (gotten: number) => gotten === 0,
-    },
-  ],
+  getValue: async () => foo,
+  assert: async (gotten: number) => gotten === 0,
 }
 export const myAction: Action = {
-  uniqueId: 'action1',
-  requiredStates: [myState],
+  actionId: 'action1',
+  beforeState: myState,
   execute: async () => {
     foo = 1
   },
 }
 
 export const randomOtherAction: Action = {
-  uniqueId: 'action2',
-  requiredStates: [myState],
+  actionId: 'action2',
+  beforeState: myState,
   execute: async () => {
     foo = 1
   },
