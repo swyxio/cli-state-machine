@@ -2,23 +2,21 @@
 
 ## High level Concepts
 
-the state machine is based on `actions`, which are based on `states`, and `requirements`.
+the state machine is based on `actions`, which are based on `states`.
 
 `Actions` consist of:
 
-- `requiredStates`: before `execute`, required States for the Action to be valid
+- `beforeState`: before `execute`, required State for the Action to be valid
 - `execute`: a function to execute once prereqs are valid
-- `postExecuteState`: post `execute`, what State the action leads to.
-- `failure`: an optional function to run if `postExecuteRequirements` doesnt get fulfiled after the action, probably due to developer forgetting to cover/catch some edge case but informs the user
+- `afterState`: post `execute`, what State the action leads to.
+- `repeatable`: if true, a boolean
 
-`States` are defined by a list of `Requirements`.
+`States` have:
 
-`Requirements` have:
+- `getValue`s: a function that runs (optionally using the config) and gets values to work with
+- `assert`s: a function that runs on the result of `getValue` and returns a boolean.
 
-- `getter`s: a function that runs on the config and gets values to work with
-- `assertion`s: a function that runs on the result of getters and returns a boolean.
-
-We can run assertions on the requirements at any time. Users should try to get their data from `getters` instead of directly accessing so that they don't run into inconsistent states and fail.
+We can run assertions on the requirements at any time. Users should try to get their data from `getters` instead of directly accessing so that they don't run into inconsistent states and fail. You can run `validateState` and get back a `ValidatedState` with two extra fields: `value` and `isValid`, for easier coding without excessive execution.
 
 check the comments on `src/types.ts` for more detailed info.
 

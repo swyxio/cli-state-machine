@@ -1,6 +1,6 @@
 {
   "name": "cli-state-machine",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "source": "src/index.ts",
   "main": "index.js",
   "umd:main": "dist/cliStateMachine.umd.production.js",
@@ -17,13 +17,16 @@
     }
   },
   "prettier": {
-    "printWidth": 80,
+    "printWidth": 100,
     "semi": false,
     "singleQuote": true,
     "trailingComma": "es5"
   },
   "devDependencies": {
+    "@types/fs-extra": "^7.0.0",
     "@types/jest": "^24.0.13",
+    "enquirer": "^2.3.0",
+    "fs-extra": "^8.0.1",
     "husky": "^2.3.0",
     "prettier": "^1.17.1",
     "pretty-quick": "^1.11.0",
@@ -32,6 +35,7 @@
   },
   "dependencies": {
     "@xstate/graph": "^0.2.1",
+    "chalk": "^2.4.2",
     "xstate": "^4.5.0"
   }
 }

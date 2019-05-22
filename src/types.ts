@@ -4,34 +4,15 @@ export type Config = {
   [key: string]: any
 }
 
-// for Requirements to get values
-export type Getter = (config: Config) => Promise<number | string | boolean>
-// States and actions can call Asserter with Getter output to check truthiness
-export type Asserter = (getterOutput: any) => Promise<Boolean>
-
-// // failed attempt at making overloaded functions
-// export function Asserter(getterOutput: string): Promise<Boolean>
-// export function Asserter(getterOutput: number): Promise<Boolean>
-// export async function Asserter() {
-//   return false
-// }
-
-// a unitary requirement that the user defines
-export type Requirement = AsyncRequirement // | SyncRequirement
-export type ValidatedRequirement = Requirement & { isValid: boolean }
-export type AsyncRequirement = {
-  name: string
-  description?: string
-  getter: Getter
-  assert: Asserter
-}
-
 // a state is just a "dumb" collection of requirements
-export type ValidatedState = State & { isValid: boolean }
-export type State = {
-  uniqueName: string
+export type ValidatedState<T = any> = State<T> & { value: T; isValid: boolean }
+export type State<T = any> = {
+  stateId: string
   description?: string
-  requirements: Requirement[]
+  /** retrieve a value for `assert` method, or for an `Action` to `execute` */
+  getValue: (config: Config) => Promise<T>
+  /** call `assert` on the result of getValue, and see if the state is valid or not */
+  assert: (value: T) => Promise<boolean>
 }
 
 /**
@@ -39,32 +20,18 @@ export type State = {
  *
  * see field comments for what each does
  *  */
-export type Action = {
-  uniqueId: string
+export type Action<beforeStateType = any, afterStateType = any> = {
+  actionId: string
   description?: string
   /** "BEFORE": prerequisite states to check */
-  requiredStates: State[]
+  beforeState: State<beforeStateType>
   /** "DURING": the meat of the action to execute once */
-  execute: (arg?: any) => Promise<void>
+  execute: (config: Config, value: beforeStateType) => Promise<void>
   /** "AFTER": a state that should be fulfilled after execute runs */
-  postExecuteState?: State
-  /** if requirements aren't fulfiled, what to do */
-  failure?: Function
+  afterState?: State<afterStateType>
+  /** if postExcuteState isn't fulfilled, should we repeat this Action?
+   *
+   * make truthy to repeat executing until afterState is fulfiled
+   * default falsy to blame the developer for afterState not being fulfiled */
+  repeatable?: boolean
 }
-
-// /**
-//  * a Healing Action is designed to explicitly take a state to another state
-//  *
-//  *  */
-// export type HealingAction = {
-//   uniqueId: string
-//   description?: string
-//   /** prerequisite state to check */
-//   preState: State
-//   /** the meat of the action to execute once */
-//   execute: (arg?: any) => Promise<void>
-//   /** the requirements that will be fulfilled after execute runs */
-//   postExecuteRequirements?: Requirement[]
-//   /** if requirements aren't fulfiled, what to do */
-//   failure?: Function
-// }

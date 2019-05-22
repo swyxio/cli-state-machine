@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "ESNext",
-    "lib": ["dom", "esnext"],
-    "declaration": true,
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es6",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
     "sourceMap": true,
+    "lib": ["esnext"],
+    "declaration": true,
     "rootDir": "./",
     "strict": true,
-    "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
@@ -17,13 +19,11 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
       "*": ["src/*", "node_modules/*"]
     },
-    "jsx": "react",
-    "esModuleInterop": true
+    "jsx": "react"
   },
-  "include": ["src", "types"],
+  "include": ["src", "types"]
 }
